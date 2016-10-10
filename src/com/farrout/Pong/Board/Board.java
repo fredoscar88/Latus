@@ -1,43 +1,96 @@
 package com.farrout.Pong.Board;
 
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
 
-import com.farrout.Pong.Game;
 import com.farrout.Pong.Layer;
+import com.farrout.Pong.Board.BoardElements.Element;
 import com.farrout.Pong.Events.Event;
 import com.farrout.Pong.Events.EventDispatcher;
 import com.farrout.Pong.Events.types.KeyPressedEvent;
 import com.farrout.Pong.Events.types.KeyReleasedEvent;
 import com.farrout.Pong.Events.types.MouseMovedEvent;
 import com.farrout.Pong.Events.types.MousePressedEvent;
+import com.farrout.Pong.entity.Entity;
 import com.farrout.Pong.graphics.Screen;
 import com.farrout.Pong.graphics.ui.UIOverlay;
-import com.farrout.Pong.input.Mouse;
 
 public class Board implements Layer {
 
-	private int points[] = new int[Game.width * Game.height];	//board width and height are uniform- for now. With the level editor I might let players change that.
+	public int width, height;
+	private int backgroundColor;
+	private List<Entity> entities = new ArrayList<>();
+	private List<Element> elements = new ArrayList<>();
 	
-	public Board(int backgroundColor) {
-		setBackground(backgroundColor);
-	}
+	private boolean[] keysPressed = new boolean[120];
 	
-	public void setPointColor(int x, int y, int col, boolean mouseCoord) {
+	//Board doesnt have to be the size of the screen, note. It likely won't be larger but it can definitely be smaller.
+	public Board(int width, int height, int backgroundColor) {
+		this.width = width;
+		this.height = height;
+		this.backgroundColor = backgroundColor;
 		
-		if (!mouseCoord) points[x + y * Game.width] = col;
-		else points[(x / Game.scale) + y / Game.scale * Game.width] = col;
+	}
+	public Board(int width, int height) {
+		this(width, height, 0);
 	}
 	
-	public void setBackground(int col) {
-		for (int i = 0; i < points.length; i++) {
-			points[i] = col;
+	public boolean elemCollide(int x, int y) {
+		
+		for (Element e : elements) {
+			if (e.contains(x, y)) return true;
 		}
+		return false;
+		
+	}
+	
+	public void addEntity(Entity e) {
+		entities.add(e);
+		e.init(this);
+	}
+	
+	public void addElement(Element e) {
+		elements.add(e);
+		e.init(this);
+	}
+	
+	public void removeEntities() {
+		for (int i = 0; i < entities.size(); i++) {
+			
+			if (entities.get(i).isRemoved()) {
+				entities.remove(i);
+			}
+		}
+	}
+	
+	public void onUpdate() {
+		if (UIOverlay.currentOverlay != null)
+			return;	//The board is not allowed to update when an overlay is open
+		
+
+		for (int i = 0; i < entities.size(); i++) {
+			Entity e = entities.get(i);
+			if (!e.isRemoved()) {
+				e.update();
+			}
+		}
+		
+		for (int i = 0; i < elements.size(); i++) {
+			elements.get(i).update();
+		}
+		
 	}
 	
 	public void onRender(Screen screen) {
 		
-		screen.renderBackground(points);
+		screen.fillRect(0,0,width,height,backgroundColor);
+		for (int i = 0; i < entities.size(); i++) {
+			entities.get(i).render(screen);
+		}
+		
+		for (int i = 0; i < elements.size(); i++) {
+			elements.get(i).render(screen);
+		}
 		
 	}
 
@@ -50,54 +103,24 @@ public class Board implements Layer {
 		dispatcher.dispatch(Event.Type.KEY_RELEASED, (Event e) -> onKeyRelease((KeyReleasedEvent) e));
 	}
 	
-	private boolean[] keysPressed = new boolean[120];
 	private boolean onKeyPress(KeyPressedEvent e) {
-		if (!keysPressed[e.getKeyCode()]) {
-			keysPressed[e.getKeyCode()] = true;
-			
-			if (e.getKeyCode() == KeyEvent.VK_SPACE)
-				setBackground(0);
-		}
-		return true;
+		
+		return false;
 	}
 
 	private boolean onKeyRelease(KeyReleasedEvent e) {
-		if (keysPressed[e.getKeyCode()]) {
-			keysPressed[e.getKeyCode()] = false;
-		}
-		return true;
+		
+		return false;
 	}
 
 	private boolean onMouseMove(MouseMovedEvent e) {
-		if (e.getDragged()) {
-			switch (Mouse.getButton()) {
-			case MouseEvent.BUTTON1: setPointColor(e.getX(), e.getY(), 0x00FF00, true); break;
-			case MouseEvent.BUTTON2: setPointColor(e.getX(), e.getY(), 0xFF0000, true); break;
-			case MouseEvent.BUTTON3: setPointColor(e.getX(), e.getY(), 0x0000FF, true); break;
-			default: setPointColor(e.getX(), e.getY(), 0x00FF00, true);
-			}
-			return true;
-		}
+		
 		return false;
 	}
 
 	private boolean onMousePress(MousePressedEvent e) {
 		
-		switch (e.getButton()) {
-		case MouseEvent.BUTTON1: setPointColor(e.getX(), e.getY(), 0x00FF00, true); break;
-		case MouseEvent.BUTTON2: setPointColor(e.getX(), e.getY(), 0xFF0000, true); break;
-		case MouseEvent.BUTTON3: setPointColor(e.getX(), e.getY(), 0x0000FF, true); break;
-		default: setPointColor(e.getX(), e.getY(), 0x00FF00, true);
-		}
-		return true;	//Did we handle the event?
-	}
-
-	public void onUpdate() {
-		// TODO Auto-generated method stub
-		
-		if (UIOverlay.currentOverlay == null)
-			return;	//The board is not allowed to update when an overlay is open
-		
+		return false;	//Did we handle the event?
 	}
 
 }

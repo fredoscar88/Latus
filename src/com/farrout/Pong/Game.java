@@ -1,21 +1,25 @@
 package com.farrout.Pong;
 
 import java.awt.Canvas;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Image;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import javax.swing.JFrame;
 
 import com.farrout.Pong.Board.Board;
+import com.farrout.Pong.Board.BoardElements.Wall;
 import com.farrout.Pong.Events.Event;
 import com.farrout.Pong.Events.EventListener;
+import com.farrout.Pong.Events.types.KeyPressedEvent;
+import com.farrout.Pong.entity.mobile.Ball;
+import com.farrout.Pong.entity.mobile.Player;
 import com.farrout.Pong.graphics.Screen;
 import com.farrout.Pong.input.Keyboard;
 import com.farrout.Pong.input.Mouse;
@@ -50,8 +54,25 @@ public class Game extends Canvas implements Runnable, EventListener {
 		screen = new Screen(width, height);
 		
 		/*TEMP*/
-		Board board = new Board(0x000000);
+		Board board = new Board(width, height - 32, 0x0F0F00);
 		addLayer(board);
+		
+		Random random = new Random();
+		
+		Ball b = new Ball();
+		board.addEntity(b);
+		board.addEntity(new Ball(50, 100, 0x2222ff));
+		board.addEntity(new Ball(55, 100, 0x22ff22));
+		for (int i = 0; i < 20000; i++) {
+			board.addEntity(new Ball(random.nextInt(280) + 10, random.nextInt(board.height-20) + 10, random.nextInt(0xFFFFFF), random.nextDouble()*2*Math.PI));
+		}
+		
+		
+		board.addElement(new Wall(0, 0, board.width, 3));
+		board.addElement(new Wall(0, board.height-3, board.width, 3));
+		board.addElement(new Wall(0, 3, 3, board.height - 3));
+		board.addElement(new Wall(board.width - 3, 3, 3, board.height - 3));
+//		board.addElement(new Wall(5, 5, 3, 3));
 		
 		setPreferredSize(size);
 		frame = new JFrame();
@@ -89,6 +110,8 @@ public class Game extends Canvas implements Runnable, EventListener {
 		int updates = 0;
 		int frames = 0;
 		
+		requestFocus();
+		
 		while (running) {
 			currentTime = System.nanoTime();
 			delta += (currentTime - lastTime) / upsRatio;	//every 1/ups of a second delta >= 1
@@ -98,6 +121,7 @@ public class Game extends Canvas implements Runnable, EventListener {
 				updates++;
 				delta--;
 			}
+			
 			
 			render();
 			frames++;
@@ -118,7 +142,15 @@ public class Game extends Canvas implements Runnable, EventListener {
 		
 	}
 	
+	boolean updateFreeze = false;
 	public void onEvent(Event event) {
+		//THE BELOW IS NOT AN APPROPRIATE WAY TO HANDLE EVENTS! TODO REMOVE
+		if (event.getType() == Event.Type.KEY_PRESSED) {
+			if (((KeyPressedEvent) event).getKeyCode() == KeyEvent.VK_SPACE) {
+				updateFreeze = false;
+			}
+		}
+		
 		//events go down the layer stack in reverse order
 		for (int i = layerStack.size() - 1; i >= 0; i--) {
 			layerStack.get(i).onEvent(event);
@@ -130,8 +162,11 @@ public class Game extends Canvas implements Runnable, EventListener {
 //		for (int i = layerStack.size() - 1; i >= 0; i--) {
 //			layerStack.get(i).onUpdate();
 //		}
-		for (int i = 0; i < layerStack.size(); i++) {
-			layerStack.get(i).onUpdate();
+		if (!updateFreeze) {
+			for (int i = 0; i < layerStack.size(); i++) {
+				layerStack.get(i).onUpdate();
+			}
+			updateFreeze = true;
 		}
 	}
 	
@@ -154,8 +189,8 @@ public class Game extends Canvas implements Runnable, EventListener {
 			pixels[i] = screen.pixels[i];
 		}
 		
-		g.setColor(new Color(0xFF00FF));
-		g.fillRect(0, 0, width*scale, height*scale);
+//		g.setColor(new Color(0xFF00FF));
+//		g.fillRect(0, 0, width*scale, height*scale);
 		g.drawImage(image, 0, 0, width * scale, height * scale, null);
 		
 		bs.show();

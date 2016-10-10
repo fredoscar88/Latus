@@ -16,7 +16,7 @@ public class Vector2i {
 		
 	}
 	
-	public Vector2i clone(Vector2i vector) {
+	public static Vector2i clone(Vector2i vector) {
 		
 		return new Vector2i(vector.x, vector.y);
 	}
