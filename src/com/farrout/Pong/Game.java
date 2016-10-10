@@ -1,6 +1,7 @@
 package com.farrout.Pong;
 
 import java.awt.Canvas;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
@@ -14,23 +15,32 @@ import java.util.Random;
 import javax.swing.JFrame;
 
 import com.farrout.Pong.Board.Board;
+import com.farrout.Pong.Board.BoardElements.Line;
 import com.farrout.Pong.Board.BoardElements.Wall;
 import com.farrout.Pong.Events.Event;
 import com.farrout.Pong.Events.EventListener;
 import com.farrout.Pong.Events.types.KeyPressedEvent;
-import com.farrout.Pong.entity.mobile.Ball;
 import com.farrout.Pong.entity.mobile.Player;
 import com.farrout.Pong.graphics.Screen;
+import com.farrout.Pong.graphics.ui.UILayer;
+import com.farrout.Pong.graphics.ui.UIOverlay;
 import com.farrout.Pong.input.Keyboard;
 import com.farrout.Pong.input.Mouse;
+
+//TODO http://libgdx.badlogicgames.com/
 
 public class Game extends Canvas implements Runnable, EventListener {
 
 	private static final long serialVersionUID = 1L;
 
-	public static int width = 300;
-	public static int height = 168;
+	//Our own display port width/height
+	public static int gameWidth = 300;
+	public static int gameHeight = 188;
+	public static int screenX = 0;
+	public static int screenY = 60;
 	public static int scale = 3;
+	public static int width = gameWidth - screenX/scale;	//Screen width, height
+	public static int height = gameHeight - screenY/scale;
 	
 	private Thread thread;
 	private JFrame frame;
@@ -40,38 +50,44 @@ public class Game extends Canvas implements Runnable, EventListener {
 	private Screen screen;
 	public List<Layer> layerStack = new ArrayList<>();
 	
-	private BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+	private BufferedImage image = new BufferedImage(width , height, BufferedImage.TYPE_INT_RGB);
 	private int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
 	
+	//this player implementation is also a bit bleh but is okay for pong..
 	private Player player1;
 	private Player player2;
 	private Keyboard key;
 	
 	public Game() {
 
-		Dimension size = new Dimension(width * scale, height * scale);
+		Dimension size = new Dimension(gameWidth * scale, gameHeight * scale);
 		
+		//Screen implementation here is really poor, Im treating it like a static object when it doesnt make sense TODO learn this lesson for next project
 		screen = new Screen(width, height);
 		
 		/*TEMP*/
-		Board board = new Board(width, height - 32, 0x0F0F00);
+		Board board = new Board(screen.width, screen.height, 0x0F0F00);
 		addLayer(board);
+		
+		UILayer layer = new UILayer();
+		layer.addPanel(new UIOverlay());
+		addLayer(layer);
 		
 		Random random = new Random();
 		
-		Ball b = new Ball();
-		board.addEntity(b);
-		board.addEntity(new Ball(50, 100, 0x2222ff));
-		board.addEntity(new Ball(55, 100, 0x22ff22));
-		for (int i = 0; i < 20000; i++) {
-			board.addEntity(new Ball(random.nextInt(280) + 10, random.nextInt(board.height-20) + 10, random.nextInt(0xFFFFFF), random.nextDouble()*2*Math.PI));
-		}
-		
+//		Ball b = new Ball();
+//		board.addEntity(b);
+//		board.addEntity(new Ball(50, 100, 0x2222ff));
+//		board.addEntity(new Ball(55, 100, 0x22ff22));
+//		for (int i = 0; i < 500; i++) {
+//			board.addEntity(new Ball(random.nextInt(board.width - 20) + 10, random.nextInt(board.height-20) + 10, random.nextInt(0xFFFFFF), random.nextDouble()*2*Math.PI, random.nextDouble()*.1 + 1));
+//		}
 		
 		board.addElement(new Wall(0, 0, board.width, 3));
 		board.addElement(new Wall(0, board.height-3, board.width, 3));
 		board.addElement(new Wall(0, 3, 3, board.height - 3));
 		board.addElement(new Wall(board.width - 3, 3, 3, board.height - 3));
+		board.addElement(new Line(board.width / 2 - 2, 3, 4, board.height-6));
 //		board.addElement(new Wall(5, 5, 3, 3));
 		
 		setPreferredSize(size);
@@ -141,15 +157,18 @@ public class Game extends Canvas implements Runnable, EventListener {
 		layerStack.add(l);
 		
 	}
+	public void removeLayer(Layer l) {
+		layerStack.remove(l);
+	}
 	
 	boolean updateFreeze = false;
 	public void onEvent(Event event) {
 		//THE BELOW IS NOT AN APPROPRIATE WAY TO HANDLE EVENTS! TODO REMOVE
-		if (event.getType() == Event.Type.KEY_PRESSED) {
-			if (((KeyPressedEvent) event).getKeyCode() == KeyEvent.VK_SPACE) {
-				updateFreeze = false;
-			}
-		}
+//		if (event.getType() == Event.Type.KEY_PRESSED) {
+//			if (((KeyPressedEvent) event).getKeyCode() == KeyEvent.VK_SPACE) {
+//				updateFreeze = !updateFreeze;
+//			}
+//		}
 		
 		//events go down the layer stack in reverse order
 		for (int i = layerStack.size() - 1; i >= 0; i--) {
@@ -159,15 +178,15 @@ public class Game extends Canvas implements Runnable, EventListener {
 	
 	private void update() {
 		//Updates from top layer to bottom. actually doesn't matter, and Im going to make it from bottom up.
-//		for (int i = layerStack.size() - 1; i >= 0; i--) {
-//			layerStack.get(i).onUpdate();
-//		}
-		if (!updateFreeze) {
-			for (int i = 0; i < layerStack.size(); i++) {
-				layerStack.get(i).onUpdate();
-			}
-			updateFreeze = true;
+		for (int i = layerStack.size() - 1; i >= 0; i--) {
+			layerStack.get(i).onUpdate();
 		}
+//		if (!updateFreeze) {
+//			for (int i = 0; i < layerStack.size(); i++) {
+//				layerStack.get(i).onUpdate();
+//			}
+//			
+//		}
 	}
 	
 	private void render() {
@@ -179,19 +198,29 @@ public class Game extends Canvas implements Runnable, EventListener {
 		}
 		Graphics g = bs.getDrawGraphics();
 		
+		g.setColor(new Color(0xFF00FF));
+		g.fillRect(0, 0, gameWidth*scale, gameHeight*scale);
+
+		//This a bad way to handle screens, since it's not really a static thing. This screen represents our board, so shouldn't board own screen?
+		//	likewise, we can have multiple screens. TODO reorganize the implementation of screen.
+		//	I think ViewArea would be a better name, too. Think about it, we should be able to draw up multiple "screens".
 		screen.clear();
 		
 		for (int i = 0; i < layerStack.size(); i++) {
-			layerStack.get(i).onRender(screen);
+			//LAYERS ONLY USE ONE OF SCREEN, OR G. NEVER BOTH. This tells me they are separate layers- meaning I should split the interface up into two different
+			//	render types. Alternatively, I structure this so that screen extends graphics... which would still let it draw stuff. BUt for now this oughta work
+			layerStack.get(i).onRender(screen, g);;
+			
 		}
 		
 		for (int i = 0; i < pixels.length; i++) {
 			pixels[i] = screen.pixels[i];
 		}
 		
-//		g.setColor(new Color(0xFF00FF));
-//		g.fillRect(0, 0, width*scale, height*scale);
-		g.drawImage(image, 0, 0, width * scale, height * scale, null);
+		g.drawImage(image, screenX, screenY, width * scale, height * scale, null);	//Draw our screen view port
+		
+//		g.setFont(new Font("Helvetica", Font.BOLD, 72));
+//		g.drawString("Pong", screen.width*3/2 - 90, screen.height*3/2 + 80);
 		
 		bs.show();
 		g.dispose();

@@ -6,10 +6,13 @@ import com.farrout.Pong.graphics.Screen;
 public abstract class Element {
 
 	Board board;
+	int color;
 	
 	public void init(Board b) {
 		board = b;
 	}
+	
+	public abstract boolean isSolid();
 	
 	public abstract boolean contains(int x, int y);
 	

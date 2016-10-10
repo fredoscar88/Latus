@@ -20,7 +20,7 @@ public class Screen {
 	
 	public void clear() {
 		for (int i = 0; i < pixels.length; i++) {
-			pixels[i] = 0xFF00FF;	//Colors the screen pink wherever we aren't rendering something, as a debug tool
+			pixels[i] = 0x000000;	//Colors the screen pink wherever we aren't rendering something, as a debug tool
 		}
 	}
 
@@ -68,7 +68,7 @@ public class Screen {
 			for (int x = 0; x < width; x++) {
 				int xd = x + xp;
 				if (xd >= this.width || xd < 0) continue;
-				pixels[xd + yd * b.width] = color;
+				pixels[xd + yd * this.width] = color;
 			}
 		}
 		

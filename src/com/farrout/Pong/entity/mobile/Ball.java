@@ -9,24 +9,24 @@ public class Ball extends Mob {
 
 	private double theta;	//Direction in degrees
 	private double speed = 1;
+	private final double maxSpeed = 4.0;
 	private double nx, ny;
 	
 	public Ball(int x, int y, int color) {
-//		this.color = color;
-//		position = new Vector2d(x, y);
-//		dimension = new Vector2i(5, 5);
-//		heading = new Vector2d(0,0);
-//		theta = Math.PI / 3;
-//		updateHeading();
-		this(x, y, color, Math.PI / 3);
+		this(x, y, color, Math.PI / 3, 1);
 	}
 	
 	public Ball(int x, int y, int color, double theta) {
+		this(x, y, color, theta, 1);
+	}
+	
+	public Ball(int x, int y, int color, double theta, double speed) {
 		this.color = color;
 		position = new Vector2d(x, y);
 		dimension = new Vector2i(5, 5);
 		heading = new Vector2d(0,0);
 		this.theta = theta;
+		this.speed = speed;
 		updateHeading();
 	}
 	
@@ -38,11 +38,16 @@ public class Ball extends Mob {
 	public void updateHeading() {
 		//theta = (theta + Math.PI / 4);
 		nx = speed * Math.cos(theta);
-		ny = speed * Math.sin(theta);
+		ny = speed * -Math.sin(theta);
+		//System.out.println(theta * 180/Math.PI);
 		
+	}
+	public void updateTheta() {
+		theta = Math.atan2(-ny, nx);
 	}
 	
 	public void move(double nx, double ny) {
+		
 		while (nx != 0) {	//when nx=0 we aren't moving anymore
 			if (Math.abs(nx) > 1) {	//basically, can we move nx 1 closer to 0? we can use (nx - abs(nx) > 0 OR math.abs(nx) > 1
 				if (!collide(abs(nx), 0)) {	//if we're not colliding into the tiles we're MOVING to
@@ -50,6 +55,7 @@ public class Ball extends Mob {
 				}
 				nx -= abs(nx);	//nx can sometimes be negative- our job tho is to get it closer to 0.
 								//if nx is positive sub 1. if negative, sub neg 1 (add 1), both bring it closer to zero.
+				
 			} else {
 				
 				if (!collide(abs(nx), 0)) {
@@ -76,20 +82,10 @@ public class Ball extends Mob {
 				ny = 0;
 			}
 		}
-		
-		//invert this.ny or w/e
-		/*
-		if (collide(0, ny)) {
-
-			ny *= -1;
-		} else {
-			position.y += ny;
-			
-		}*/
-
-		
 	}
 	
+	//Temporary for viewing collision regions. Does not work perfectly sadly. TODO remove
+	//I will say though the collision is working
 	int madx1, mady1, madx2, mady2;
 	
 	public boolean collide(double x, double y) {
@@ -110,11 +106,12 @@ public class Ball extends Mob {
 //			int xci = (int) xc;
 //			int yci = (int) yc;
 			//if (board.elemCollide(xci, yci)) collide = true;
-			if (board.elemCollide(xci, yci)) collide = true;
+			if (board.elemCollide(xci, yci)) {
+				collide = true;
+			}
 		 	
 		}
 		return collide;
-		
 	}
 	
 	private int abs(Double d) {
@@ -122,9 +119,24 @@ public class Ball extends Mob {
 		return 1;
 	}
 	
+	int time;
 	//Collision and basically ALL of this stuff needs to go in the move method. we should just give it the xd, yd (the delta for our current position) and let it figure the rest out.
 	public void update() {
 		move(nx, ny);
+		updateTheta();	//updates angle based on any changes to nx, ny
+		time++;
+		
+		//Update speed after a random amount of collisions TODO change speed update
+		if (time % 60 == 0) {
+			speed += .1;
+			if (speed < maxSpeed) {
+				speed += .1;
+			} else if (speed > maxSpeed) {
+				speed = maxSpeed;
+			}
+			updateTheta();
+			updateHeading();
+		}
 	}
 	
 	public void render(Screen screen) {

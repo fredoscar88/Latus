@@ -10,7 +10,7 @@ public class Vector2i {
 		this.y = y;
 	}
 	
-	public Vector2i add(Vector2i v0, Vector2i v1) {
+	public static Vector2i add(Vector2i v0, Vector2i v1) {
 		
 		return new Vector2i(v0.x + v1.x, v0.y + v1.y);
 		

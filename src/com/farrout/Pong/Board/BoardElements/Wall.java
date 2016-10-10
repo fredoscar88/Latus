@@ -28,5 +28,9 @@ public class Wall extends Element {
 	public void render(Screen screen) {
 		screen.fillRect(x0, y0, width, height, color);
 	}
+
+	public boolean isSolid() {
+		return true;
+	}
 	
 }
