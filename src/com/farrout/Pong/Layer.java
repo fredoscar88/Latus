@@ -1,9 +1,9 @@
 package com.farrout.Pong;
 
 import java.awt.Graphics;
+import java.util.List;
 
 import com.farrout.Pong.Events.Event;
-import com.farrout.Pong.graphics.Screen;
 
 public interface Layer {
 
@@ -11,11 +11,13 @@ public interface Layer {
 //		SCREEN, GRAPHICS
 //	}
 	
-	public void onRender(Screen screen, Graphics g);
+	public void onRender(Graphics g);
 	
 	public void onEvent(Event e);
+
+	public boolean onUpdate();
 	
-	public void onUpdate();
+	public void init(List<Layer> l);
 	
 //	public DrawsTo getRenderObject();
 	

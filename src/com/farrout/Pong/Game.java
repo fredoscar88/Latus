@@ -3,11 +3,10 @@ package com.farrout.Pong;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferStrategy;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferInt;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -20,12 +19,18 @@ import com.farrout.Pong.Board.BoardElements.Wall;
 import com.farrout.Pong.Events.Event;
 import com.farrout.Pong.Events.EventListener;
 import com.farrout.Pong.Events.types.KeyPressedEvent;
+import com.farrout.Pong.entity.mobile.Ball;
+import com.farrout.Pong.entity.mobile.Paddle;
 import com.farrout.Pong.entity.mobile.Player;
 import com.farrout.Pong.graphics.Screen;
+import com.farrout.Pong.graphics.ui.UILabel;
 import com.farrout.Pong.graphics.ui.UILayer;
 import com.farrout.Pong.graphics.ui.UIOverlay;
+import com.farrout.Pong.input.Focus;
 import com.farrout.Pong.input.Keyboard;
 import com.farrout.Pong.input.Mouse;
+import com.farrout.Pong.util.MathUtils;
+import com.farrout.Pong.util.Vector2i;
 
 //TODO http://libgdx.badlogicgames.com/
 
@@ -34,54 +39,67 @@ public class Game extends Canvas implements Runnable, EventListener {
 	private static final long serialVersionUID = 1L;
 
 	//Our own display port width/height
-	public static int gameWidth = 300;
-	public static int gameHeight = 188;
-	public static int screenX = 0;
-	public static int screenY = 60;
-	public static int scale = 3;
-	public static int width = gameWidth - screenX/scale;	//Screen width, height
-	public static int height = gameHeight - screenY/scale;
+	public static int gameWidth = 300 * 3;
+	public static int gameHeight = 188 * 3;
+//	public static int scale = 3;
+//	public static int width = gameWidth - screenX/scale;	//Screen width, height
+//	public static int height = gameHeight - screenY/scale;
 	
 	private Thread thread;
 	private JFrame frame;
 	private final static String title = "Pong";
 	private boolean running = false;
 	
-	private Screen screen;
 	public List<Layer> layerStack = new ArrayList<>();
 	
-	private BufferedImage image = new BufferedImage(width , height, BufferedImage.TYPE_INT_RGB);
-	private int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
-	
-	//this player implementation is also a bit bleh but is okay for pong..
-	private Player player1;
-	private Player player2;
 	private Keyboard key;
+	
+	Random random = new Random();
+	
+	public static UILayer pauseLayer;
+	public static UILayer startLayer;
 	
 	public Game() {
 
-		Dimension size = new Dimension(gameWidth * scale, gameHeight * scale);
+		Dimension size = new Dimension(gameWidth, gameHeight);
 		
 		//Screen implementation here is really poor, Im treating it like a static object when it doesnt make sense TODO learn this lesson for next project
-		screen = new Screen(width, height);
+//		screen = new Screen(width, height);
+		
+		pauseLayer = new UILayer();
+		UIOverlay pauseOverlay = new UIOverlay() {
+			public boolean onKeyPress(KeyPressedEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_P) {
+					pauseLayer.ownerLayerStack.remove(pauseLayer);
+				}
+				return true;
+			}
+		};
+		pauseLayer.addPanel(pauseOverlay);
+		pauseOverlay.addComponent(new UILabel(new Vector2i(10,100), "PAUSED", new Font("Helvetica",Font.BOLD, 32)).setColor(0xFF0000));
+		pauseOverlay.init(pauseLayer);
 		
 		/*TEMP*/
-		Board board = new Board(screen.width, screen.height, 0x0F0F00);
+		//These constants will be based on game width and height. Frankly we don't need the scale in this Game class
+		Board board = new Board(0, 60, 300, 168, 3, 0x0F0F00, layerStack);
 		addLayer(board);
 		
-		UILayer layer = new UILayer();
-		layer.addPanel(new UIOverlay());
-		addLayer(layer);
+		startLayer = new UILayer();
+		UIOverlay startOverlay = new UIOverlay(0x7F000000) {
+			public boolean onKeyPress(KeyPressedEvent e) {
+				startLayer.ownerLayerStack.remove(startLayer);
+				random.nextInt(15);
+				board.addEntity(new Ball(board.width/2 - Ball.size / 2,board.height/2 - Ball.size / 2, 0x88CC88, (MathUtils.randDouble(Math.PI / 4, -Math.PI / 4) - (random.nextBoolean() ? Math.PI : 0))));
+				board.addEntity(new Paddle(board.width - 150, board.height - 120, 0xCC8888));
+				return true;
+			}
+		};
+		startLayer.addPanel(startOverlay);
+		startOverlay.addComponent(new UILabel(new Vector2i(10,100), "Press any key to start", new Font("Helvetica",Font.BOLD, 32)).setColor(0x00FF00));
+		startOverlay.init(startLayer);	//TODO implement LayerManager
 		
-		Random random = new Random();
 		
-//		Ball b = new Ball();
-//		board.addEntity(b);
-//		board.addEntity(new Ball(50, 100, 0x2222ff));
-//		board.addEntity(new Ball(55, 100, 0x22ff22));
-//		for (int i = 0; i < 500; i++) {
-//			board.addEntity(new Ball(random.nextInt(board.width - 20) + 10, random.nextInt(board.height-20) + 10, random.nextInt(0xFFFFFF), random.nextDouble()*2*Math.PI, random.nextDouble()*.1 + 1));
-//		}
+		board.addUI();
 		
 		board.addElement(new Wall(0, 0, board.width, 3));
 		board.addElement(new Wall(0, board.height-3, board.width, 3));
@@ -99,6 +117,8 @@ public class Game extends Canvas implements Runnable, EventListener {
 		Mouse mouse = new Mouse(this);
 		addMouseListener(mouse);
 		addMouseMotionListener(mouse);
+		
+		addFocusListener(new Focus(this));
 
 	}
 	
@@ -155,21 +175,15 @@ public class Game extends Canvas implements Runnable, EventListener {
 	
 	public void addLayer(Layer l) {
 		layerStack.add(l);
+		l.init(layerStack);
 		
 	}
 	public void removeLayer(Layer l) {
 		layerStack.remove(l);
 	}
 	
-	boolean updateFreeze = false;
 	public void onEvent(Event event) {
-		//THE BELOW IS NOT AN APPROPRIATE WAY TO HANDLE EVENTS! TODO REMOVE
-//		if (event.getType() == Event.Type.KEY_PRESSED) {
-//			if (((KeyPressedEvent) event).getKeyCode() == KeyEvent.VK_SPACE) {
-//				updateFreeze = !updateFreeze;
-//			}
-//		}
-		
+
 		//events go down the layer stack in reverse order
 		for (int i = layerStack.size() - 1; i >= 0; i--) {
 			layerStack.get(i).onEvent(event);
@@ -178,15 +192,13 @@ public class Game extends Canvas implements Runnable, EventListener {
 	
 	private void update() {
 		//Updates from top layer to bottom. actually doesn't matter, and Im going to make it from bottom up.
+		//TODO make update use events, i.e call an update event and send it to layers, so layers can pause other layers if they want
+		//TODO figure out if that's what we really want to do.
 		for (int i = layerStack.size() - 1; i >= 0; i--) {
-			layerStack.get(i).onUpdate();
+			if (layerStack.get(i).onUpdate() == true) break;
 		}
-//		if (!updateFreeze) {
-//			for (int i = 0; i < layerStack.size(); i++) {
-//				layerStack.get(i).onUpdate();
-//			}
-//			
-//		}
+		
+		//onEvent(new Event(Event.Type.UPDATE));
 	}
 	
 	private void render() {
@@ -199,25 +211,25 @@ public class Game extends Canvas implements Runnable, EventListener {
 		Graphics g = bs.getDrawGraphics();
 		
 		g.setColor(new Color(0xFF00FF));
-		g.fillRect(0, 0, gameWidth*scale, gameHeight*scale);
+		g.fillRect(0, 0, gameWidth, gameHeight);
 
 		//This a bad way to handle screens, since it's not really a static thing. This screen represents our board, so shouldn't board own screen?
 		//	likewise, we can have multiple screens. TODO reorganize the implementation of screen.
 		//	I think ViewArea would be a better name, too. Think about it, we should be able to draw up multiple "screens".
-		screen.clear();
+//		screen.clear();
 		
 		for (int i = 0; i < layerStack.size(); i++) {
 			//LAYERS ONLY USE ONE OF SCREEN, OR G. NEVER BOTH. This tells me they are separate layers- meaning I should split the interface up into two different
 			//	render types. Alternatively, I structure this so that screen extends graphics... which would still let it draw stuff. BUt for now this oughta work
-			layerStack.get(i).onRender(screen, g);;
+			layerStack.get(i).onRender(g);
 			
 		}
 		
-		for (int i = 0; i < pixels.length; i++) {
-			pixels[i] = screen.pixels[i];
-		}
+//		for (int i = 0; i < pixels.length; i++) {
+//			pixels[i] = screen.pixels[i];
+//		}
 		
-		g.drawImage(image, screenX, screenY, width * scale, height * scale, null);	//Draw our screen view port
+//		g.drawImage(image, screenX, screenY, width * scale, height * scale, null);	//Draw our screen view port
 		
 //		g.setFont(new Font("Helvetica", Font.BOLD, 72));
 //		g.drawString("Pong", screen.width*3/2 - 90, screen.height*3/2 + 80);

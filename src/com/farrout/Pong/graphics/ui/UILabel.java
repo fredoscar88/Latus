@@ -10,7 +10,7 @@ public class UILabel extends UIComponent {
 	public String text;
 	public Font font;
 	
-	public UILabel (String text, Font f, Vector2i position) {
+	public UILabel (Vector2i position, String text, Font f) {
 		this.text = text;
 		font = f;
 		this.position = position;

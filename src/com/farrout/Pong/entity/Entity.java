@@ -8,6 +8,7 @@ public class Entity {
 
 	//Visibility subject to change
 	protected Vector2d position;
+	protected Vector2d size;
 	public Board board;
 	protected boolean removed = false;
 	
@@ -35,4 +36,5 @@ public class Entity {
 	public boolean isRemoved() {
 		return removed;
 	}
+
 }

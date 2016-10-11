@@ -6,31 +6,39 @@ import java.util.List;
 
 import com.farrout.Pong.Layer;
 import com.farrout.Pong.Events.Event;
-import com.farrout.Pong.graphics.Screen;
 
 public class UILayer implements Layer {
 
-	private List<UIPanel> panels = new ArrayList<>();
+	public List<UIPanel> panels = new ArrayList<>();
+	boolean blockUpdates = false;
+	public List<Layer> ownerLayerStack;
 	
 	public void addPanel(UIPanel c) {
 		panels.add(c);
 		c.init(this);
 	}
 	
-	public void onRender(Screen screen, Graphics g) {
+	public void onRender(Graphics g) {
 		for (UIPanel p : panels) {
 			p.render(g);
 		}
 	}
 
 	public void onEvent(Event e) {
-		
+		for (UIPanel p: panels) {
+			p.onEvent(e);
+		}
 	}
 
-	public void onUpdate() {
+	public boolean onUpdate() {
 		for (UIPanel p : panels) {
 			p.update();
 		}
+		return blockUpdates;
+	}
+
+	public void init(List<Layer> l) {
+		this.ownerLayerStack = l;
 	}
 
 	/*public DrawsTo getRenderObject() {

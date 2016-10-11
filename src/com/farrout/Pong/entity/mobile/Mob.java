@@ -2,6 +2,7 @@ package com.farrout.Pong.entity.mobile;
 
 import com.farrout.Pong.entity.Entity;
 import com.farrout.Pong.graphics.Screen;
+import com.farrout.Pong.util.MathUtils;
 import com.farrout.Pong.util.Vector2d;
 import com.farrout.Pong.util.Vector2i;
 
@@ -11,6 +12,13 @@ public class Mob extends Entity {
 	Vector2d heading;
 	protected int color;
 	
+	public enum BounceType {
+		LEFT,
+		RIGHT,
+		UP,
+		DOWN
+	}
+	
 	public void move(double xa, double ya) {
 		
 		if (xa != 0 && ya != 0) {
@@ -19,23 +27,41 @@ public class Mob extends Entity {
 			return;
 		}
 		
-		if (!collision(position.x + xa, position.y + ya)) {
-			
-		}
-		
 		position.add(xa, ya);
 		
 	}
 	
-	/**
-	 * Returns true of a collideable object (entity, wall) is in the way.
-	 * @param x coordinate to check
-	 * @param y coordinate to check
-	 * @return <code>true</code> if the coordinate the object is trying to move into is collideable
-	 */
-	public boolean collision(double x, double y) {
+	public double bounceAngle(double dim, BounceType type) {
 		
-		return false;
+		double xhalf = dimension.x/2;
+		double yhalf = dimension.y/2;
+		switch (type) {
+			case LEFT: {
+				System.out.println("LEFT");
+				dim -= position.y;
+				dim = Math.abs(yhalf - dim);	//should be between 0 and 1, inclusive
+				return (dim * (MathUtils.RAD75 - -MathUtils.RAD75) + -MathUtils.RAD75) + Math.PI;
+			}
+			case RIGHT: {
+				System.out.println("RIGHT");
+				dim -= position.y;
+				dim = Math.abs(yhalf - dim);	//should be between 0 and 1, inclusive
+				return (dim * (MathUtils.RAD75 - -MathUtils.RAD75) + -MathUtils.RAD75);
+			}
+			case UP: {
+				System.out.println("UP");
+				dim -= position.x;
+				dim = Math.abs(xhalf - dim);	//should be between 0 and 1, inclusive
+				return (dim * (-MathUtils.RAD15 + Math.PI - MathUtils.RAD15) + MathUtils.RAD285);
+			}
+			case DOWN: {
+				System.out.println("DOWN");
+				dim -= position.x;
+				dim = Math.abs(xhalf - dim);	//should be between 0 and 1, inclusive
+				return (dim * (-MathUtils.RAD15 + Math.PI - MathUtils.RAD15) + MathUtils.RAD285) + Math.PI;
+			}
+		}
+		return 0;
 	}
 	
 	public int getWidth() {
@@ -56,6 +82,13 @@ public class Mob extends Entity {
 	
 	public void render(Screen screen) {
 		
+	}
+
+	public boolean contains(double x, double y) {
+		/*System.out.println((x >= position.x && x < (position.x + dimension.x) && y >= position.y && y < (position.y + dimension.y)) + "\n" + 
+				"x " + x + ", position.x " + position.x + " " + (position.x + dimension.x) + ", y " + y + ", position.y " + position.y + " " + (position.y + dimension.y));*/
+		return (x >= position.x && x < (position.x + dimension.x) && y >= position.y && y < (position.y + dimension.y));
+		//((x0 <= x) && (x < x1)) && ((y0 <= y) && (y < y1));
 	}
 	
 }

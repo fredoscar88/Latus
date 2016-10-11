@@ -3,6 +3,7 @@ package com.farrout.Pong.graphics.ui;
 import java.awt.Color;
 import java.awt.Graphics;
 
+import com.farrout.Pong.Events.types.FocusLostEvent;
 import com.farrout.Pong.util.Vector2i;
 
 public abstract class UIComponent {
@@ -13,15 +14,17 @@ public abstract class UIComponent {
 	Vector2i position, size;	//Position (relative to panel) and size
 	Vector2i offset;	//Offset from the panel
 	
-	public void setColor(Color c) {
+	public UIComponent setColor(Color c) {
 		color = c;
+		return this;
 	}
 	
-	public void setColor(int c) {
+	public UIComponent setColor(int c) {
 		if ((c & 0xFF000000) == 0)	//Check if we have alpha
-			color = new Color(c, false);
+			color = new Color(c, false);	//does not have alpha
 		else 
-			color = new Color(c, true);
+			color = new Color(c, true);		//does have alpha
+		return this;
 	}
 	
 	public void init(UIPanel panel) {

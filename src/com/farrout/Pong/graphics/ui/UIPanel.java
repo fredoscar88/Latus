@@ -1,9 +1,15 @@
 package com.farrout.Pong.graphics.ui;
 
 import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.farrout.Pong.Events.Event;
+import com.farrout.Pong.Events.EventDispatcher;
+import com.farrout.Pong.Events.types.FocusLostEvent;
+import com.farrout.Pong.Events.types.KeyPressedEvent;
+import com.farrout.Pong.Events.types.MousePressedEvent;
 import com.farrout.Pong.util.Vector2i;
 
 public class UIPanel extends UIComponent {
@@ -36,13 +42,41 @@ public class UIPanel extends UIComponent {
 		this.layer = layer;
 	}
 	
+	public void onEvent(Event event) {
+		EventDispatcher dispatcher = new EventDispatcher(event);
+		dispatcher.dispatch(Event.Type.MOUSE_PRESSED, (Event e) -> onMousePress((MousePressedEvent) e));
+		dispatcher.dispatch(Event.Type.KEY_PRESSED, (Event e) -> onKeyPress((KeyPressedEvent) e));
+		dispatcher.dispatch(Event.Type.FOCUS_LOST, (Event e) -> onFocusLost((FocusLostEvent) e));
+	}
+	
+	public boolean onFocusLost(FocusLostEvent e) {
+		return false;
+	}
+
+	public boolean onKeyPress(KeyPressedEvent e) {
+		
+		return false;
+	}
+
+	public boolean onMousePress(MousePressedEvent e) {
+		
+		if (new Rectangle(position.x, position.y, size.x, size.y).contains(e.getX(), e.getY())) {
+			return true;
+		}
+		return false;
+	}
+	
 	public void update() {
-		System.out.println("Panel updated " + this + " " + Integer.toHexString(color.getRGB()));
+		
 	}
 
 	public void render(Graphics g) {
+		
 		g.setColor(color);	//right? right! confurmed by TerCherners
 		g.fillRect(position.x, position.y, size.x, size.y);
+		for (int i = 0; i < components.size(); i++) {
+			components.get(i).render(g);
+		}
 		
 	}
 	
