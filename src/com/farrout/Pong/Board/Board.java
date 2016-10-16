@@ -26,6 +26,7 @@ import com.farrout.Pong.graphics.Screen;
 import com.farrout.Pong.graphics.ui.UILabel;
 import com.farrout.Pong.graphics.ui.UILayer;
 import com.farrout.Pong.graphics.ui.UIPanel;
+import com.farrout.Pong.input.Mouse;
 import com.farrout.Pong.util.Vector2i;
 
 public class Board implements Layer {
@@ -105,6 +106,7 @@ public class Board implements Layer {
 	 */
 	public double entCollide(double x0, double y0, double theta, Mob mm) {
 		
+		
 		for (Entity e : entities) {
 			if (e instanceof Mob) {
 				Mob m = (Mob) e;
@@ -130,17 +132,45 @@ public class Board implements Layer {
 		for (Entity m : entities) {
 			if (m instanceof Paddle && m != mob) {
 				if (((Mob) m).contains(x, y)) {
+					
 					return true;
 				}
 			}
 		}
 		return false;
 	}
+	public boolean entCollide(int x, int y) {
+		
+		for (Entity m : entities) {
+//			System.out.println(x + ", " + y);
+//			System.out.println(m + ", x: " + m.getPosition().x + ", y: " + m.getPosition().y );
+			if (((Mob) m).contains(x, y)) {
+				
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public Paddle paddleAt(int x, int y) {
+		
+		for (Entity m : entities) {
+//			System.out.println(x + ", " + y);
+//			System.out.println(m + ", x: " + m.getPosition().x + ", y: " + m.getPosition().y );
+			if (m instanceof Paddle && ((Mob) m).contains(x, y)) {
+				
+				return (Paddle) m;
+			}
+		}
+		return null;
+	}
 	
 	public boolean elemCollide(int x, int y) {
 		
 		for (Element e : elements) {
-			if (e.contains(x, y) && e.isSolid()) return true;
+			if (e.contains(x, y) && e.isSolid()) {
+				return true;
+			}
 		}
 		return false;
 		
@@ -257,8 +287,19 @@ public class Board implements Layer {
 	private boolean onMousePress(MousePressedEvent e) {
 		if (e.getButton() == MouseEvent.BUTTON1) {
 //			addEntity(new Ball(e.getX() / scale, e.getY() / scale - y/scale, random.nextInt(0xFFFFFF), random.nextDouble() * 2*Math.PI));		
-			addEntity(new Ball(e.getX() / 3, e.getY() / 3 - y/3, random.nextInt(0xFFFFFF), 3*Math.PI / 2, Ball.maxSpeed));		
+//			addEntity(new Ball(e.getX() / 3, e.getY() / 3 - y/3, random.nextInt(0xFFFFFF), 3*Math.PI / 2, Ball.maxSpeed));		
+			int mousex = e.getX() / 3;
+			int mousey = e.getY() / 3 - 20;
+			
+			System.out.println("Paddle? " + entCollide(e.getX() / 3, e.getY() / 3 - 20));
+			Paddle p = paddleAt(mousex, mousey);
+			
+			if (p != null) System.out.println("Angle of bounce: " + Math.toDegrees(p.bounceOffAngle(mousex, mousey)));
 			return true;	//Did we handle the event?
+		}
+		if (e.getButton() == MouseEvent.BUTTON2) {
+			addEntity(new Ball(e.getX() / 3, e.getY() / 3 - y/3, random.nextInt(0xFFFFFF), 3 * Math.PI / 2, Ball.maxSpeed));
+			return true;
 		}
 		if (e.getButton() == MouseEvent.BUTTON3) {
 			addEntity(new Paddle(e.getX() / scale, e.getY() / scale - y/scale, 0xFFFFFF));		

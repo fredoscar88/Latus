@@ -47,7 +47,7 @@ public class Game extends Canvas implements Runnable, EventListener {
 	
 	private Thread thread;
 	private JFrame frame;
-	private final static String title = "Pong";
+	private final static String title = "Latus- Made by Henry Farr";
 	private boolean running = false;
 	
 	public List<Layer> layerStack = new ArrayList<>();
@@ -98,7 +98,7 @@ public class Game extends Canvas implements Runnable, EventListener {
 		startOverlay.addComponent(new UILabel(new Vector2i(10,100), "Press any key to start", new Font("Helvetica",Font.BOLD, 32)).setColor(0x00FF00));
 		startOverlay.init(startLayer);	//TODO implement LayerManager
 		
-		
+		//Probably not the best way to add UI, from an OO perspective
 		board.addUI();
 		
 		board.addElement(new Wall(0, 0, board.width, 3));
@@ -164,7 +164,7 @@ public class Game extends Canvas implements Runnable, EventListener {
 			
 			while (System.currentTimeMillis() - timer >= 1000) {
 				timer += 1000;
-				frame.setTitle("FPS: " + frames + ", UPS: " + updates);
+				frame.setTitle(title + " DEBUG: FPS: " + frames + ", UPS: " + updates);
 				updates = 0;
 				frames = 0;
 			}

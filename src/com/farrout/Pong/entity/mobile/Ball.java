@@ -52,6 +52,7 @@ public class Ball extends Mob {
 	public void move(double nx, double ny) {
 		double nxx = nx;
 		double nyy = ny;
+		Paddle p;
 		
 		while (nx != 0) {	//when nx=0 we aren't moving anymore
 			if (Math.abs(nx) > 1) {	//basically, can we move nx 1 closer to 0? we can use (nx - abs(nx) > 0 OR math.abs(nx) > 1
@@ -66,7 +67,9 @@ public class Ball extends Mob {
 				if (!entCollide(abs(nx), 0)) {
 					position.x += nx;
 				} else {
-					theta = Math.toRadians(90 + 90 * abs(nx));
+					p = board.paddleAt(((int) position.x) + abs(nx), ((int) position.y) + abs(ny));
+					if (p != null) theta = p.bounceOffAngle(((int) position.x) + abs(nx), ((int) position.y) + abs(ny));
+//					theta = Math.toRadians(90 + 90 * abs(nx));
 					updateHeading();
 				}
 				nx = 0;
@@ -83,13 +86,16 @@ public class Ball extends Mob {
 				if (!entCollide(0, abs(ny))) {
 					position.y += ny;
 				} else {
-					theta = Math.toRadians(0 + 90 * abs(ny));
+					p = board.paddleAt(((int) position.x) + abs(nx), ((int) position.y) + abs(ny));
+					if (p != null) theta = p.bounceOffAngle(((int) position.x) + abs(nx), ((int) position.y) + abs(ny));
+					//theta = Math.toRadians(0 + 90 * abs(ny));
 					updateHeading();
 				}
 				ny = 0;
 			}
 		}
 		
+		//Reset since we're checking a new collision
 		nx = nxx;
 		ny = nyy;
 		
@@ -203,7 +209,7 @@ public class Ball extends Mob {
 	public void update() {
 		move(nx, ny);
 		updateTheta();	//updates angle based on any changes to nx, ny
-		if (collisions > 20) remove();
+		//if (collisions > 20) remove();
 		collisions--;
 		if (collisions < 0) collisions = 0;
 		time++;
