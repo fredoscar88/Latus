@@ -22,11 +22,12 @@ import com.farrout.Pong.entity.Entity;
 import com.farrout.Pong.entity.mobile.Ball;
 import com.farrout.Pong.entity.mobile.Mob;
 import com.farrout.Pong.entity.mobile.Paddle;
+import com.farrout.Pong.entity.mobile.Player;
 import com.farrout.Pong.graphics.Screen;
 import com.farrout.Pong.graphics.ui.UILabel;
 import com.farrout.Pong.graphics.ui.UILayer;
 import com.farrout.Pong.graphics.ui.UIPanel;
-import com.farrout.Pong.input.Mouse;
+import com.farrout.Pong.input.KeyMap;
 import com.farrout.Pong.util.Vector2i;
 
 public class Board implements Layer {
@@ -45,6 +46,11 @@ public class Board implements Layer {
 	private boolean paused = false;
 	boolean blockUpdates;
 	Random random = new Random();
+	
+	Player p1;
+	Player p2;
+	KeyMap k1 = new KeyMap(KeyEvent.VK_W, KeyEvent.VK_S);
+	KeyMap k2 = new KeyMap(KeyEvent.VK_UP, KeyEvent.VK_DOWN);
 	
 	private boolean[] keysPressed = new boolean[120];
 	private List<Layer> ownerLayerStack;
@@ -91,8 +97,9 @@ public class Board implements Layer {
 			
 		});
 		addLayer(menu);
-		menu.panels.get(0).addComponent(new UILabel(new Vector2i(10,40), "Hi", new Font("Helvetica",Font.BOLD, 32)).setColor(0xFFFFFF));
+		menu.panels.get(0).addComponent(new UILabel(new Vector2i(10,40), "Pong", new Font("Helvetica",Font.BOLD, 32)).setColor(0xFFFFFF));
 		
+		//TODO change the addUI method. A board component shouldnt be managing UI that isnt part of the board! It's part of the Game as a whole, yes, but not the board.
 		addLayer(Game.startLayer);
 		
 	}
@@ -213,6 +220,15 @@ public class Board implements Layer {
 	
 	public boolean onUpdate() {
 
+		if (p1 == null) {
+			p1 = new Player(6, 50, Paddle.DEF_COLOR, k1);
+			this.addEntity(p1);
+		}
+		if (p2 == null) {
+			p2 = new Player(300 - 11, 50, Paddle.DEF_COLOR, k2);
+			this.addEntity(p2);
+		}
+		
 		for (int i = 0; i < entities.size(); i++) {
 			Entity e = entities.get(i);
 			if (!e.isRemoved()) {
@@ -225,7 +241,7 @@ public class Board implements Layer {
 		
 		//Even while paused, we can clean up some entities
 		removeEntities();
-		return blockUpdates;	//shouldnt ever be true
+		return blockUpdates;	//shouldnt ever be true, board is the last layer to even receive updates.
 	}
 	
 	public void onRender(Graphics g) {
@@ -259,10 +275,6 @@ public class Board implements Layer {
 	
 	private boolean onKeyPress(KeyPressedEvent e) {
 		
-		if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-			paused = !paused;
-			return true;
-		}
 		if (e.getKeyCode() == KeyEvent.VK_R) {
 			removeAllBalls();
 			return true;

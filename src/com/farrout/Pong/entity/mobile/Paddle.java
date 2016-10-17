@@ -6,10 +6,10 @@ import com.farrout.Pong.util.Vector2i;
 
 public class Paddle extends Mob {
 
-	private double nx, ny;
-	private double speed = 1;
-	private int width = 24;
-	private int height = 24;
+	protected int width = 5;
+	protected int height = 75;
+	
+	public static final int DEF_COLOR = 0xCC8888;
 	
 	public Paddle(int x, int y, int color) {
 		this.color = color;
@@ -41,7 +41,7 @@ public class Paddle extends Mob {
 		//But first we must contain the x and y
 		if (contains(x, y)) {
 			
-			System.out.println(x + " " + (position.x + width) );
+//			System.out.println(x + " " + (position.x + width) );
 			if ((int) x == (int) (position.x + width - 1)) {	//Right edge
 				if (relYPos < yHalf) {	//Upper half of right edge
 					distFromHalf = yHalf - relYPos;
@@ -50,7 +50,7 @@ public class Paddle extends Mob {
 				else if (relYPos > yHalf) {	//Lower half of right edge, or center. The = inclusion can be on either.
 					distFromHalf = yHalf - relYPos;
 				}
-				System.out.println("RIGHT " + distFromHalf + " " + yHalf);
+//				System.out.println("RIGHT " + distFromHalf + " " + yHalf);
 				theta = (distFromHalf / yHalf) * maxAngle;
 			} else if ((int) x == (int) (position.x)) {	//Left edge
 				if (relYPos < yHalf) {	//Upper half of right edge
@@ -59,7 +59,7 @@ public class Paddle extends Mob {
 				else if (relYPos >= yHalf) {	//Lower half of right edge, or center. The = inclusion can be on either.
 					distFromHalf = relYPos - yHalf;
 				}
-				System.out.println("LEFT " + distFromHalf + " " + yHalf);
+//				System.out.println("LEFT " + distFromHalf + " " + yHalf);
 				theta = Math.PI + (distFromHalf / yHalf) * maxAngle;
 			} else if ((int) y == (int) (position.y + height - 1)) {	//Bottom
 				
@@ -70,7 +70,7 @@ public class Paddle extends Mob {
 				else if (relXPos > xHalf) {	//Lower half of right edge, or center. The = inclusion can be on either.
 					distFromHalf = relXPos - xHalf;
 				}
-				System.out.println("BOTTOM " + distFromHalf + " " + xHalf);
+//				System.out.println("BOTTOM " + distFromHalf + " " + xHalf);
 				theta = (distFromHalf / xHalf) * maxAngle - (Math.PI / 2);
 				
 			} else if ((int) y == (int) (position.y)) {	//TOP
@@ -82,7 +82,7 @@ public class Paddle extends Mob {
 				else if (relXPos > xHalf) {	//Lower half of right edge, or center. The = inclusion can be on either.
 					distFromHalf = xHalf - relXPos;
 				}
-				System.out.println("TOP " + distFromHalf + " " + xHalf);
+//				System.out.println("TOP " + distFromHalf + " " + xHalf);
 				theta = (distFromHalf / xHalf) * maxAngle + (Math.PI / 2);
 				
 			}

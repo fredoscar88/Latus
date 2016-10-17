@@ -9,16 +9,16 @@ public class Ball extends Mob {
 
 	private double theta;	//Direction in degrees
 	private double speed = .5;
-	public static final double maxSpeed = .5;
+	public static final double maxSpeed = 2;
 	private double nx, ny;
 	public static int size = 5;
 	
 	public Ball(int x, int y, int color) {
-		this(x, y, color, Math.PI / 3, 1);
+		this(x, y, color, Math.PI / 3, .5);
 	}
 	
 	public Ball(int x, int y, int color, double theta) {
-		this(x, y, color, theta, 1);
+		this(x, y, color, theta, .5);
 	}
 	
 	public Ball(int x, int y, int color, double theta, double speed) {
@@ -47,6 +47,20 @@ public class Ball extends Mob {
 		theta = Math.atan2(-ny, nx);
 	}
 	
+	public void addSpeed(double amt) {
+		collisions++;
+		if (collisions % 10 == 0) {
+			
+			if (speed < maxSpeed) {
+				speed += amt;
+			} else if (speed > maxSpeed) {
+				speed = maxSpeed;
+			}
+			updateTheta();
+			updateHeading();
+		}
+	}
+	
 	int collisions = 0;
 	boolean breakflag;
 	public void move(double nx, double ny) {
@@ -69,6 +83,7 @@ public class Ball extends Mob {
 				} else {
 					p = board.paddleAt(((int) position.x) + abs(nx), ((int) position.y) + abs(ny));
 					if (p != null) theta = p.bounceOffAngle(((int) position.x) + abs(nx), ((int) position.y) + abs(ny));
+					addSpeed(0.1);
 //					theta = Math.toRadians(90 + 90 * abs(nx));
 					updateHeading();
 				}
@@ -88,6 +103,7 @@ public class Ball extends Mob {
 				} else {
 					p = board.paddleAt(((int) position.x) + abs(nx), ((int) position.y) + abs(ny));
 					if (p != null) theta = p.bounceOffAngle(((int) position.x) + abs(nx), ((int) position.y) + abs(ny));
+					addSpeed(0.1);
 					//theta = Math.toRadians(0 + 90 * abs(ny));
 					updateHeading();
 				}
@@ -191,7 +207,6 @@ public class Ball extends Mob {
 			//if (board.elemCollide(xci, yci)) collide = true;
 			if (board.entCollide(xci, yci, this)) {
 				collide = true;
-				collisions+=2;
 			}
 		 	
 		}
@@ -204,28 +219,14 @@ public class Ball extends Mob {
 		return 1;
 	}
 	
-	int time;
 	//Collision and basically ALL of this stuff needs to go in the move method. we should just give it the xd, yd (the delta for our current position) and let it figure the rest out.
 	public void update() {
 		move(nx, ny);
 		updateTheta();	//updates angle based on any changes to nx, ny
-		//if (collisions > 20) remove();
-		collisions--;
-		if (collisions < 0) collisions = 0;
-		time++;
-		
+//		if (collisions % 5 == 0) speed+=0.1;
+//		time++;
+		System.out.println("Collisions: " + collisions + ", speed: " + speed);
 		//Update speed after a random amount of collisions TODO change speed update
-		if (time % 60 == 0) {
-			speed += .1;
-			
-			if (speed < maxSpeed) {
-				speed += .1;
-			} else if (speed > maxSpeed) {
-				speed = maxSpeed;
-			}
-			updateTheta();
-			updateHeading();
-		}
 		
 	}
 	

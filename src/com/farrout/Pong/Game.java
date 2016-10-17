@@ -90,7 +90,7 @@ public class Game extends Canvas implements Runnable, EventListener {
 				startLayer.ownerLayerStack.remove(startLayer);
 				random.nextInt(15);
 				board.addEntity(new Ball(board.width/2 - Ball.size / 2,board.height/2 - Ball.size / 2, 0x88CC88, (MathUtils.randDouble(Math.PI / 4, -Math.PI / 4) - (random.nextBoolean() ? Math.PI : 0))));
-				board.addEntity(new Paddle(board.width - 150, board.height - 120, 0xCC8888));
+//				board.addEntity(new Paddle(board.width - 150, board.height - 120, 0xCC8888));
 				return true;
 			}
 		};

@@ -31,6 +31,7 @@ public class Mob extends Entity {
 		
 	}
 	
+	@Deprecated
 	public double bounceAngle(double dim, BounceType type) {
 		
 		double xhalf = dimension.x/2;
