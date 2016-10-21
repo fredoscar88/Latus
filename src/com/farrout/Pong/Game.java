@@ -20,9 +20,6 @@ import com.farrout.Pong.Events.Event;
 import com.farrout.Pong.Events.EventListener;
 import com.farrout.Pong.Events.types.KeyPressedEvent;
 import com.farrout.Pong.entity.mobile.Ball;
-import com.farrout.Pong.entity.mobile.Paddle;
-import com.farrout.Pong.entity.mobile.Player;
-import com.farrout.Pong.graphics.Screen;
 import com.farrout.Pong.graphics.ui.UILabel;
 import com.farrout.Pong.graphics.ui.UILayer;
 import com.farrout.Pong.graphics.ui.UIOverlay;
@@ -49,6 +46,8 @@ public class Game extends Canvas implements Runnable, EventListener {
 	private JFrame frame;
 	private final static String title = "Latus- Made by Henry Farr";
 	private boolean running = false;
+	private boolean debug = true;
+	private boolean debugUpdate = false;
 	
 	public List<Layer> layerStack = new ArrayList<>();
 	
@@ -184,6 +183,19 @@ public class Game extends Canvas implements Runnable, EventListener {
 	
 	public void onEvent(Event event) {
 
+		if (event.getType() == Event.Type.KEY_PRESSED) {
+			if (((KeyPressedEvent) event).getKeyCode() == KeyEvent.VK_D) {
+				debugUpdate = true;
+				return;
+			}
+		}
+		if (event.getType() == Event.Type.KEY_PRESSED) {
+			if (((KeyPressedEvent) event).getKeyCode() == KeyEvent.VK_C) {
+				debug = !debug;
+				return;
+			}
+		}
+		
 		//events go down the layer stack in reverse order
 		for (int i = layerStack.size() - 1; i >= 0; i--) {
 			layerStack.get(i).onEvent(event);
@@ -191,6 +203,12 @@ public class Game extends Canvas implements Runnable, EventListener {
 	}
 	
 	private void update() {
+		
+		if (debug && !debugUpdate) {
+			return;
+		}
+		debugUpdate = false;
+		
 		//Updates from top layer to bottom. actually doesn't matter, and Im going to make it from bottom up.
 		//TODO make update use events, i.e call an update event and send it to layers, so layers can pause other layers if they want
 		//TODO figure out if that's what we really want to do.

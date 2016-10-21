@@ -9,7 +9,7 @@ public class Ball extends Mob {
 
 	private double theta;	//Direction in degrees
 	private double speed = .5;
-	public static final double maxSpeed = 2;
+	public static final double maxSpeed = .5;//2;
 	private double nx, ny;
 	public static int size = 5;
 	
@@ -81,11 +81,13 @@ public class Ball extends Mob {
 				if (!entCollide(abs(nx), 0)) {
 					position.x += nx;
 				} else {
-					p = board.paddleAt(((int) position.x) + abs(nx), ((int) position.y) + abs(ny));
-					if (p != null) theta = p.bounceOffAngle(((int) position.x) + abs(nx), ((int) position.y) + abs(ny));
+					p = board.paddleAt(((int) position.x) + abs(nx), ((int) position.y) /*+ abs(ny)*/);
+					if (p != null) theta = p.bounceOffAngle(((int) position.x) + abs(nx), ((int) position.y) /*+ abs(ny)*/);
 					addSpeed(0.1);
-//					theta = Math.toRadians(90 + 90 * abs(nx));
+
 					updateHeading();
+//					move(this.nx, this.ny);
+//					return;
 				}
 				nx = 0;
 			}
@@ -101,17 +103,20 @@ public class Ball extends Mob {
 				if (!entCollide(0, abs(ny))) {
 					position.y += ny;
 				} else {
-					p = board.paddleAt(((int) position.x) + abs(nx), ((int) position.y) + abs(ny));
-					if (p != null) theta = p.bounceOffAngle(((int) position.x) + abs(nx), ((int) position.y) + abs(ny));
+					p = board.paddleAt(((int) position.x) /*+ abs(nx)*/, ((int) position.y) + abs(ny));
+					if (p != null) theta = p.bounceOffAngle(((int) position.x) /*+ abs(nx)*/, ((int) position.y) + abs(ny));
 					addSpeed(0.1);
 					//theta = Math.toRadians(0 + 90 * abs(ny));
 					updateHeading();
+//					move(this.nx, this.ny);
+//					return;
 				}
 				ny = 0;
 			}
 		}
 		
 		//Reset since we're checking a new collision
+		//It should probably TODO get this from the global.
 		nx = nxx;
 		ny = nyy;
 		
@@ -233,10 +238,10 @@ public class Ball extends Mob {
 	public void render(Screen screen) {
 		screen.renderMob(this);
 		screen.renderPoint((int) position.x, (int) position.y, 0xFF00FF);
-//		screen.renderPoint(madx1, mady1, 0xFFFFFF);
-//		screen.renderPoint(madx1, mady2, 0xFFFFFF);
-//		screen.renderPoint(madx2, mady1, 0xFFFFFF);
-//		screen.renderPoint(madx2, mady2, 0xFFFFFF);
+		screen.renderPoint(madx1, mady1, 0xFFFFFF);
+		screen.renderPoint(madx1, mady2, 0xFFFFFF);
+		screen.renderPoint(madx2, mady1, 0xFFFFFF);
+		screen.renderPoint(madx2, mady2, 0xFFFFFF);
 	}
 		
 }
