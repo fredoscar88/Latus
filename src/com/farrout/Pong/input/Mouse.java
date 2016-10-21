@@ -36,7 +36,6 @@ public class Mouse implements MouseListener, MouseMotionListener {
 
 	public void mousePressed(MouseEvent e) {
 		mouseB = e.getButton();
-		//Generate event, send event to game TODO
 		Event event = new MousePressedEvent(e.getButton(), e.getX(), e.getY());
 		eventListener.onEvent(event);
 	}

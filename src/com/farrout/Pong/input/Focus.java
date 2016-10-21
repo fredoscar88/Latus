@@ -15,7 +15,6 @@ public class Focus implements FocusListener {
 	}
 	
 	public void focusGained(FocusEvent e) {
-		// TODO Auto-generated method stub
 		
 	}
 

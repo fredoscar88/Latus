@@ -13,7 +13,7 @@ public class Player extends Paddle {
 	}
 	
 	private void move(int xa, int ya) {
-		//I'm not implementing collision detection that will stop you if you hit a wall, not right now. TODO add collision detection for paddles on walls/other
+		//I'm not implementing collision detection that will stop you if you hit a wall, not right now. TODO IMPORTANT add collision detection for paddles on walls/balls
 //		if (position.y > 4 && (position.y + height) <= board.height - 4) {
 //			
 //		}

@@ -101,7 +101,7 @@ public class Board implements Layer {
 		addLayer(menu);
 		menu.panels.get(0).addComponent(new UILabel(new Vector2i(10,40), "Pong", new Font("Helvetica",Font.BOLD, 32)).setColor(0xFFFFFF));
 		
-		//TODO change the addUI method. A board component shouldnt be managing UI that isnt part of the board! It's part of the Game as a whole, yes, but not the board.
+		//TODO change the addUI method. A board component shouldnt be managing UI that isnt part of the board! It's part of the Game as a whole, yes, but not the board. (in regard to the menu I think)
 		addLayer(Game.startLayer);
 		
 	}

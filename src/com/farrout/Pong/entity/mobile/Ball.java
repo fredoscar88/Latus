@@ -1,5 +1,8 @@
 package com.farrout.Pong.entity.mobile;
 
+import java.io.File;
+
+import com.farrout.Pong.Game;
 import com.farrout.Pong.Board.Board;
 import com.farrout.Pong.graphics.Screen;
 import com.farrout.Pong.graphics.ui.UILabel;
@@ -15,6 +18,8 @@ public class Ball extends Mob {
 	public static final double maxSpeed = 4;//2;
 	private double nx, ny;
 	public static int size = 5;
+	
+	private File hitSound = new File("res/sound/wallhit.wav");
 	
 	private UILabel speedLabel;
 	
@@ -124,8 +129,6 @@ public class Ball extends Mob {
 	
 	public boolean allCollide(double x, double y) {
 		
-		//TODO remove collide boolean from allCollide
-		boolean collide = false;
 		madx1 = (int) Math.ceil((((0 % 2) * (dimension.x - 1)) + position.x) + x);
 		madx2 = (int) Math.floor((((1 % 2) * (dimension.x - 1)) + position.x) + x);
 		mady1 = (int) Math.ceil((((0 / 2) * (dimension.y - 1)) + position.y) + y - 1);
@@ -138,23 +141,18 @@ public class Ball extends Mob {
 			int yci = (int) Math.floor(yc);
 			if (c % 2 == 0) xci = (int) Math.ceil(xc);	//when (c % 2 == 0), x is in the left most position
 		 	if (c / 2 == 0) yci = (int) Math.ceil(yc);	//when (c / 2 == 0), y is in the up most position WE'D CHANGE THESE TO ONE IF WE USED FLOOR INSTEAD OF CEIL ABOVE
-//			int xci = (int) xc;
-//			int yci = (int) yc;
-			//if (board.elemCollide(xci, yci)) collide = true;
+
 			if (board.entCollide(xci, yci, this)) {
-				collide = true;
-				
+
 				Paddle p = board.paddleAt(xci, yci);
 				if (p != null) updateTheta(p.bounceOffAngle(xci, yci));
 				addSpeed(speedIncrement);
 				updateHeading();
+				Game.playSound(hitSound);
 				
 				return true;
-				//TODO CALC NEW ANGLE based on entity bounce
 			}
 			if (board.elemCollide(xci, yci)) {
-				collide = true;
-				//TODO CALC NEW ANGLE (based on nx, ny
 				
 				if (x == 0) {
 					this.ny *= -1;
@@ -163,6 +161,8 @@ public class Ball extends Mob {
 				}
 				updateTheta();
 				updateHeading();
+				Game.playSound(hitSound);
+				
 				return true;
 			}
 		 	

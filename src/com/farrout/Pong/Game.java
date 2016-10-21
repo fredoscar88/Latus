@@ -7,10 +7,15 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferStrategy;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JFrame;
 
 import com.farrout.Pong.Board.Board;
@@ -30,6 +35,8 @@ import com.farrout.Pong.util.MathUtils;
 import com.farrout.Pong.util.Vector2i;
 
 //TODO http://libgdx.badlogicgames.com/
+//TODO create a sound manager class/interface; Game should OWN it but it should be passed on init or something to sound playing objects.
+//	^^^^^ which is why it should maybe be an interface, so they just have to implement it.
 
 public class Game extends Canvas implements Runnable, EventListener {
 
@@ -61,9 +68,6 @@ public class Game extends Canvas implements Runnable, EventListener {
 
 		Dimension size = new Dimension(gameWidth, gameHeight);
 		
-		//Screen implementation here is really poor, Im treating it like a static object when it doesnt make sense TODO learn this lesson for next project
-//		screen = new Screen(width, height);
-		
 		pauseLayer = new UILayer();
 		UIOverlay pauseOverlay = new UIOverlay() {
 			public boolean onKeyPress(KeyPressedEvent e) {
@@ -94,7 +98,7 @@ public class Game extends Canvas implements Runnable, EventListener {
 		};
 		startLayer.addPanel(startOverlay);
 		startOverlay.addComponent(new UILabel(new Vector2i(10,100), "Press any key to start", new Font("Helvetica",Font.BOLD, 32)).setColor(0x00FF00));
-		startOverlay.init(startLayer);	//TODO implement LayerManager
+		startOverlay.init(startLayer);	//TODO create/implement a LayerManager
 		
 		//Probably not the best way to add UI, from an OO perspective
 		board.addUI();
@@ -118,6 +122,20 @@ public class Game extends Canvas implements Runnable, EventListener {
 		
 		addFocusListener(new Focus(this));
 
+	}
+	
+	public static void playSound(File sound) {
+		
+		//TODO we REALLY need a sound managing class. THIS IS STARTING A NEW THREAD FOR EVERY PLAYSOUND BUT IT IS NOT CLOSING THEM
+		/*try {
+			Clip clip = AudioSystem.getClip();
+			clip.open(AudioSystem.getAudioInputStream(sound));
+			clip.start();
+			
+		} catch (Exception e) {
+			
+		}*/
+		
 	}
 	
 	public synchronized void start() {
@@ -204,8 +222,6 @@ public class Game extends Canvas implements Runnable, EventListener {
 	private void update() {
 		
 		//Updates from top layer to bottom. actually doesn't matter, and Im going to make it from bottom up.
-		//TODO make update use events, i.e call an update event and send it to layers, so layers can pause other layers if they want
-		//TODO figure out if that's what we really want to do.
 		for (int j = 0; j < artDPS; j++) {
 			for (int i = layerStack.size() - 1; i >= 0; i--) {
 				if (layerStack.get(i).onUpdate() == true) break;
@@ -226,11 +242,6 @@ public class Game extends Canvas implements Runnable, EventListener {
 		
 		g.setColor(new Color(0xFF00FF));
 		g.fillRect(0, 0, gameWidth, gameHeight);
-
-		//This a bad way to handle screens, since it's not really a static thing. This screen represents our board, so shouldn't board own screen?
-		//	likewise, we can have multiple screens. TODO reorganize the implementation of screen.
-		//	I think ViewArea would be a better name, too. Think about it, we should be able to draw up multiple "screens".
-//		screen.clear();
 		
 		for (int i = 0; i < layerStack.size(); i++) {
 			//LAYERS ONLY USE ONE OF SCREEN, OR G. NEVER BOTH. This tells me they are separate layers- meaning I should split the interface up into two different
