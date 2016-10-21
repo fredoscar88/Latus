@@ -1,24 +1,29 @@
 package com.farrout.Pong.entity.mobile;
 
+import com.farrout.Pong.Board.Board;
 import com.farrout.Pong.graphics.Screen;
-import com.farrout.Pong.util.MathUtils;
+import com.farrout.Pong.graphics.ui.UILabel;
+import com.farrout.Pong.graphics.ui.UIPanel;
 import com.farrout.Pong.util.Vector2d;
 import com.farrout.Pong.util.Vector2i;
 
 public class Ball extends Mob {
 
 	private double theta;	//Direction in degrees
-	private double speed = .5;
-	public static final double maxSpeed = .5;//2;
+	private double speed;
+	private double speedIncrement = .1;
+	public static final double maxSpeed = 4;//2;
 	private double nx, ny;
 	public static int size = 5;
 	
+	private UILabel speedLabel;
+	
 	public Ball(int x, int y, int color) {
-		this(x, y, color, Math.PI / 3, .5);
+		this(x, y, color, Math.PI / 3, 2.0);
 	}
 	
 	public Ball(int x, int y, int color, double theta) {
-		this(x, y, color, theta, .5);
+		this(x, y, color, theta, 2.0);
 	}
 	
 	public Ball(int x, int y, int color, double theta, double speed) {
@@ -29,6 +34,9 @@ public class Ball extends Mob {
 		this.theta = theta;
 		this.speed = speed;
 		updateHeading();
+		
+		speedLabel = new UILabel(new Vector2i(100, 42), "Ball Speed: ");
+		
 	}
 	
 	public Ball() {
@@ -45,6 +53,9 @@ public class Ball extends Mob {
 	}
 	public void updateTheta() {
 		theta = Math.atan2(-ny, nx);
+	}
+	public void updateTheta(double theta) {
+		this.theta = theta;
 	}
 	
 	public void addSpeed(double amt) {
@@ -64,109 +75,101 @@ public class Ball extends Mob {
 	int collisions = 0;
 	boolean breakflag;
 	public void move(double nx, double ny) {
-		double nxx = nx;
-		double nyy = ny;
-		Paddle p;
 		
 		while (nx != 0) {	//when nx=0 we aren't moving anymore
 			if (Math.abs(nx) > 1) {	//basically, can we move nx 1 closer to 0? we can use (nx - abs(nx) > 0 OR math.abs(nx) > 1
-				if (!entCollide(abs(nx), 0)) {	//if we're not colliding into the tiles we're MOVING to
+				if (!allCollide(abs(nx), 0)) {	//if we're not colliding into the tiles we're MOVING to
 					position.x += abs(nx);
+				}
+				else {
+					return;
 				}
 				nx -= abs(nx);	//nx can sometimes be negative- our job tho is to get it closer to 0.
 								//if nx is positive sub 1. if negative, sub neg 1 (add 1), both bring it closer to zero.
 				
 			} else {
 				
-				if (!entCollide(abs(nx), 0)) {
+				if (!allCollide(abs(nx), 0)) {
 					position.x += nx;
 				} else {
-					p = board.paddleAt(((int) position.x) + abs(nx), ((int) position.y) /*+ abs(ny)*/);
-					if (p != null) theta = p.bounceOffAngle(((int) position.x) + abs(nx), ((int) position.y) /*+ abs(ny)*/);
-					addSpeed(0.1);
-
-					updateHeading();
-//					move(this.nx, this.ny);
-//					return;
+					return;
 				}
 				nx = 0;
 			}
 		}
 		while (ny != 0 ) {
 			if (Math.abs(ny) > 1) {
-				if (!entCollide(0, abs(ny))) {
+				if (!allCollide(0, abs(ny))) {
 					position.y += abs(ny);
+				} else {
+					return;
 				}
 				ny -= abs(ny);	
 			} else {
 				
-				if (!entCollide(0, abs(ny))) {
+				if (!allCollide(0, abs(ny))) {
 					position.y += ny;
 				} else {
-					p = board.paddleAt(((int) position.x) /*+ abs(nx)*/, ((int) position.y) + abs(ny));
-					if (p != null) theta = p.bounceOffAngle(((int) position.x) /*+ abs(nx)*/, ((int) position.y) + abs(ny));
-					addSpeed(0.1);
-					//theta = Math.toRadians(0 + 90 * abs(ny));
-					updateHeading();
-//					move(this.nx, this.ny);
-//					return;
+					return;
 				}
 				ny = 0;
 			}
 		}
 		
-		//Reset since we're checking a new collision
-		//It should probably TODO get this from the global.
-		nx = nxx;
-		ny = nyy;
-		
-		while (nx != 0) {	//when nx=0 we aren't moving anymore
-			if (Math.abs(nx) > 1) {	//basically, can we move nx 1 closer to 0? we can use (nx - abs(nx) > 0 OR math.abs(nx) > 1
-				if (!collide(abs(nx), 0)) {	//if we're not colliding into the tiles we're MOVING to
-					position.x += abs(nx);
-				}
-				nx -= abs(nx);	//nx can sometimes be negative- our job tho is to get it closer to 0.
-								//if nx is positive sub 1. if negative, sub neg 1 (add 1), both bring it closer to zero.
-				
-			} else {
-				
-				if (!collide(abs(nx), 0)) {
-					position.x += nx;
-				} else {
-					this.nx *= -1;
-				}
-				nx = 0;
-			}
-		}
-		while (ny != 0) {
-			if (Math.abs(ny) > 1) {
-				if (!collide(0, abs(ny))) {
-					position.y += abs(ny);
-				}
-				ny -= abs(ny);	
-			} else {
-				
-				if (!collide(0, abs(ny))) {
-					position.y += ny;
-				} else {
-					this.ny *= -1;
-				}
-				ny = 0;
-			}
-		}
-		
-		
-//		double entityBounceTheta = board.entCollide(position.x + abs(nxx), position.y + abs(nyy), theta, this);
-//		if (theta != entityBounceTheta) {
-//			theta = entityBounceTheta;
-//			updateHeading();
-//		}
 	}
 	
 	//Temporary for viewing collision regions. Does not work perfectly sadly. TODO remove
 	//I will say though the collision is working
 	int madx1, mady1, madx2, mady2;
 	
+	public boolean allCollide(double x, double y) {
+		
+		//TODO remove collide boolean from allCollide
+		boolean collide = false;
+		madx1 = (int) Math.ceil((((0 % 2) * (dimension.x - 1)) + position.x) + x);
+		madx2 = (int) Math.floor((((1 % 2) * (dimension.x - 1)) + position.x) + x);
+		mady1 = (int) Math.ceil((((0 / 2) * (dimension.y - 1)) + position.y) + y - 1);
+		mady2 = (int) Math.floor((((2 / 2) * (dimension.y)) + position.y) + y - 1);
+		
+		for (int c = 0; c < 4; c++) {
+			double xc = (((c % 2) * (dimension.x) - 1) + position.x) + x;
+			double yc = (((c / 2) * (dimension.y) - 1) + position.y) + y;
+			int xci = (int) Math.floor(xc);
+			int yci = (int) Math.floor(yc);
+			if (c % 2 == 0) xci = (int) Math.ceil(xc);	//when (c % 2 == 0), x is in the left most position
+		 	if (c / 2 == 0) yci = (int) Math.ceil(yc);	//when (c / 2 == 0), y is in the up most position WE'D CHANGE THESE TO ONE IF WE USED FLOOR INSTEAD OF CEIL ABOVE
+//			int xci = (int) xc;
+//			int yci = (int) yc;
+			//if (board.elemCollide(xci, yci)) collide = true;
+			if (board.entCollide(xci, yci, this)) {
+				collide = true;
+				
+				Paddle p = board.paddleAt(xci, yci);
+				if (p != null) updateTheta(p.bounceOffAngle(xci, yci));
+				addSpeed(speedIncrement);
+				updateHeading();
+				
+				return true;
+				//TODO CALC NEW ANGLE based on entity bounce
+			}
+			if (board.elemCollide(xci, yci)) {
+				collide = true;
+				//TODO CALC NEW ANGLE (based on nx, ny
+				
+				if (x == 0) {
+					this.ny *= -1;
+				} else if (y == 0) {
+					this.nx *= -1;
+				}
+				updateTheta();
+				updateHeading();
+				return true;
+			}
+		 	
+		}
+		return false;
+	}
+	@Deprecated
 	public boolean collide(double x, double y) {
 		
 		boolean collide = false;
@@ -192,6 +195,7 @@ public class Ball extends Mob {
 		}
 		return collide;
 	}
+	@Deprecated
 	public boolean entCollide(double x, double y) {
 		
 		boolean collide = false;
@@ -207,9 +211,7 @@ public class Ball extends Mob {
 			int yci = (int) Math.floor(yc);
 			if (c % 2 == 0) xci = (int) Math.ceil(xc);	//when (c % 2 == 0), x is in the left most position
 		 	if (c / 2 == 0) yci = (int) Math.ceil(yc);	//when (c / 2 == 0), y is in the up most position WE'D CHANGE THESE TO ONE IF WE USED FLOOR INSTEAD OF CEIL ABOVE
-//			int xci = (int) xc;
-//			int yci = (int) yc;
-			//if (board.elemCollide(xci, yci)) collide = true;
+
 			if (board.entCollide(xci, yci, this)) {
 				collide = true;
 			}
@@ -228,10 +230,8 @@ public class Ball extends Mob {
 	public void update() {
 		move(nx, ny);
 		updateTheta();	//updates angle based on any changes to nx, ny
-//		if (collisions % 5 == 0) speed+=0.1;
-//		time++;
-		System.out.println("Collisions: " + collisions + ", speed: " + speed);
-		//Update speed after a random amount of collisions TODO change speed update
+		
+		speedLabel.setText("Ball Speed: " + Double.toString(speed) + " " + Double.toString(collisions));
 		
 	}
 	
@@ -242,6 +242,11 @@ public class Ball extends Mob {
 		screen.renderPoint(madx1, mady2, 0xFFFFFF);
 		screen.renderPoint(madx2, mady1, 0xFFFFFF);
 		screen.renderPoint(madx2, mady2, 0xFFFFFF);
+	}
+	
+	public void init(Board b, UIPanel uiPanel) {
+		super.init(b, uiPanel);
+		topPanel.addComponent(speedLabel);
 	}
 		
 }

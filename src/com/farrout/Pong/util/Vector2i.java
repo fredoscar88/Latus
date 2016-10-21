@@ -16,6 +16,12 @@ public class Vector2i {
 		
 	}
 	
+	public Vector2i add(Vector2i v2i) {
+		
+		return new Vector2i(x + v2i.x, y + v2i.y);
+		
+	}
+	
 	public static Vector2i clone(Vector2i vector) {
 		
 		return new Vector2i(vector.x, vector.y);

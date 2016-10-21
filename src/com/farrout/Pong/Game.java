@@ -46,8 +46,7 @@ public class Game extends Canvas implements Runnable, EventListener {
 	private JFrame frame;
 	private final static String title = "Latus- Made by Henry Farr";
 	private boolean running = false;
-	private boolean debug = true;
-	private boolean debugUpdate = false;
+	private int artDPS = 1;
 	
 	public List<Layer> layerStack = new ArrayList<>();
 	
@@ -185,13 +184,13 @@ public class Game extends Canvas implements Runnable, EventListener {
 
 		if (event.getType() == Event.Type.KEY_PRESSED) {
 			if (((KeyPressedEvent) event).getKeyCode() == KeyEvent.VK_D) {
-				debugUpdate = true;
+				artDPS++;
 				return;
 			}
 		}
 		if (event.getType() == Event.Type.KEY_PRESSED) {
 			if (((KeyPressedEvent) event).getKeyCode() == KeyEvent.VK_C) {
-				debug = !debug;
+				artDPS = 1;
 				return;
 			}
 		}
@@ -204,16 +203,13 @@ public class Game extends Canvas implements Runnable, EventListener {
 	
 	private void update() {
 		
-		if (debug && !debugUpdate) {
-			return;
-		}
-		debugUpdate = false;
-		
 		//Updates from top layer to bottom. actually doesn't matter, and Im going to make it from bottom up.
 		//TODO make update use events, i.e call an update event and send it to layers, so layers can pause other layers if they want
 		//TODO figure out if that's what we really want to do.
-		for (int i = layerStack.size() - 1; i >= 0; i--) {
-			if (layerStack.get(i).onUpdate() == true) break;
+		for (int j = 0; j < artDPS; j++) {
+			for (int i = layerStack.size() - 1; i >= 0; i--) {
+				if (layerStack.get(i).onUpdate() == true) break;
+			}
 		}
 		
 		//onEvent(new Event(Event.Type.UPDATE));

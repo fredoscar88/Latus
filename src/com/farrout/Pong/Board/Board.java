@@ -38,6 +38,8 @@ public class Board implements Layer {
 	private int backgroundColor;
 	public Screen screen;
 	
+	UILayer menu;
+	
 	private List<Entity> entities = new ArrayList<>();
 	private List<Element> elements = new ArrayList<>();
 	private List<Board> boards;
@@ -78,7 +80,7 @@ public class Board implements Layer {
 	}
 	
 	public void addUI() {
-		UILayer menu = new UILayer();
+		menu = new UILayer();
 		menu.addPanel(new UIPanel(new Vector2i(0,0), new Vector2i(Game.gameWidth, 60)) {
 			
 			public boolean onFocusLost(FocusLostEvent e) {
@@ -185,7 +187,7 @@ public class Board implements Layer {
 	
 	public void addEntity(Entity e) {
 		entities.add(e);
-		e.init(this);
+		e.init(this, menu.panels.get(0));
 	}
 	
 	public void addElement(Element e) {

@@ -15,6 +15,15 @@ public class UILabel extends UIComponent {
 		font = f;
 		this.position = position;
 	}
+	public UILabel (Vector2i position, String text) {
+		this.text = text;
+		font = new Font("Times New Roman", Font.PLAIN, 30);
+		this.position = position;
+	}
+	
+	public void setText(String text) {
+		this.text = text;
+	}
 	
 	public void update() {
 		

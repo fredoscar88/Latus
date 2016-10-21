@@ -32,8 +32,8 @@ public class Player extends Paddle {
 	public void update() {
 		super.update();
 		keyMap.update();
-		if (keyMap.getValue() == Value.UP) move(0, -1);
-		if (keyMap.getValue() == Value.DOWN) move(0, 1);
+		if (keyMap.getValue() == Value.UP) move(0, -2);
+		if (keyMap.getValue() == Value.DOWN) move(0, 2);
 		
 	}
 	

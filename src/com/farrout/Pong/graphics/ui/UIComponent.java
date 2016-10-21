@@ -40,6 +40,10 @@ public abstract class UIComponent {
 		return Vector2i.add(position, offset);
 	}
 	
+	public void setPosition(Vector2i newPosition) {
+		position = newPosition.add(offset);
+	}
+	
 	public abstract void update();
 	
 	public abstract void render(Graphics g);
