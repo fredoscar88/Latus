@@ -127,14 +127,14 @@ public class Game extends Canvas implements Runnable, EventListener {
 	public static void playSound(File sound) {
 		
 		//TODO we REALLY need a sound managing class. THIS IS STARTING A NEW THREAD FOR EVERY PLAYSOUND BUT IT IS NOT CLOSING THEM
-		/*try {
+		try {
 			Clip clip = AudioSystem.getClip();
 			clip.open(AudioSystem.getAudioInputStream(sound));
 			clip.start();
 			
 		} catch (Exception e) {
 			
-		}*/
+		}
 		
 	}
 	
